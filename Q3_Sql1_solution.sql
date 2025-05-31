@@ -1,15 +1,12 @@
-with rank_email_duplicates as 
+with ranked_emails as 
 (
-select 
-    id
-    , email
-    , row_number() over(partition by email order by id) as rownum
-from 
-    Person
+    select 
+        id
+        , email
+        , row_number() over(partition by email order by id) as rnk
+    from 
+        Person
 )
-select 
-    id 
-    , email
-from 
-    rank_email_duplicates
-where rownum = 1
+delete 
+from person p
+where p.id in (select ranked_emails.id from ranked_emails where rnk > 1)
